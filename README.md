@@ -25,3 +25,6 @@ python misskey2text.py --j notes-20xx-xx-xx-xx-xx-xx.json --p n
 此命令仅按年份分割贴文并进行归档，不下载媒体文件到本地。
 
 生成的md文件可用任意Markdown编辑器打开。
+
+效果示范：
+![screenshot](screenshot.png)
