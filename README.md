@@ -11,7 +11,7 @@
 将`misskey2text.py`放入归档文件所在的文件夹中，在终端中输入：
 
 ```
-python --j misskey2text.py
+python misskey2text.py --j notes-20xx-xx-xx-xx-xx-xx.json
 ```
 
 此命令将按年份分割贴文并进行归档，并将所有媒体文件下载至本地文件夹`media`中，md文件内的图片地址为本地地址。
@@ -19,7 +19,7 @@ python --j misskey2text.py
 如果不希望下载图片，只需要存档文字（媒体文件直接引用网络地址），请使用以下命令：
 
 ```
-python --j misskey2text.py --p n
+python misskey2text.py --j notes-20xx-xx-xx-xx-xx-xx.json --p n
 ```
 
 此命令仅按年份分割贴文并进行归档，不下载媒体文件到本地。
