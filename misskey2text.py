@@ -31,7 +31,7 @@ def split_json_by_year(filename, picdl=None):
                 for file in item['files']:
                     if 'url' in file:
                         file_url = file['url']
-                        if optional is None:
+                        if picdl is None:
                             local_filename = download_file(file_url)
                             local_url = os.path.join('media', local_filename)
                             files_info.append(f"![{local_filename}]({local_url})")
