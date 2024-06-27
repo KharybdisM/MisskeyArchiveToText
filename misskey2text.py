@@ -1,8 +1,9 @@
 import json
 import os
 import requests
-import argparse
 from datetime import datetime
+import tkinter as tk
+from tkinter import filedialog,messagebox
 
 def download_file(url, directory='misskey-archive/media'):
     local_filename = url.split('/')[-1]
@@ -16,7 +17,7 @@ def download_file(url, directory='misskey-archive/media'):
 
 def split_json_by_year(filename, picdl=None):
     with open(filename, 'r', encoding='utf-8') as f:
-      data = json.load(f)
+        data = json.load(f)
     
     file_cache = {}
     for item in data:
@@ -25,19 +26,18 @@ def split_json_by_year(filename, picdl=None):
 
         entry = f"发布时间：{entry_time}\n"
         entry += f"{item['text']}\n"
-        if item['files']:
-            if 'files' in item:
-                files_info = []
-                for file in item['files']:
-                    if 'url' in file:
-                        file_url = file['url']
-                        if picdl is None:
-                            local_filename = download_file(file_url)
-                            local_url = os.path.join('media', local_filename)
-                            files_info.append(f"![{local_filename}]({local_url})")
-                        else:
-                            files_info.append(f"![Picture]({file_url})")
-                entry += f"媒体文件：\n{'\n'.join(files_info)}\n"
+        if 'files' in item and item['files']:
+            files_info = []
+            for file in item['files']:
+                if 'url' in file:
+                    file_url = file['url']
+                    if picdl is None:
+                        local_filename = download_file(file_url)
+                        local_url = os.path.join('media', local_filename)
+                        files_info.append(f"![{local_filename}]({local_url})")
+                    else:
+                        files_info.append(f"![Picture]({file_url})")
+            entry += f"媒体文件：\n{'\n'.join(files_info)}\n"
         entry += '\n-----\n\n'
         
         if year not in file_cache:
@@ -51,16 +51,46 @@ def split_json_by_year(filename, picdl=None):
     for year, entries in file_cache.items():
         with open(os.path.join('misskey-archive', f"{year}.md"), 'w', encoding='utf-8') as f:
             f.write(entries)
+    
+    messagebox.showinfo("处理完成", "数据处理完成！生成的Markdown文件保存在misskey-archive这一文件夹下。")
 
-# 创建一个解析器
-parser = argparse.ArgumentParser(description='从给定的json文件中处理数据')
-# 添加一个名为jsonfile的参数，类型为str，引用时使用--jsonfile，在help中显示的说明为'输入的json文件'
-parser.add_argument('--j', type=str, required=True, help='输入的json文件')
-parser.add_argument('--p', type=str, help='是否下载图片到本地，n为不下载，留空为下载')
-# 解析参数
-args = parser.parse_args()
-filename = args.j
-picdl = args.p
+def browse_file():
+    filename = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
+    entry_file.delete(0, tk.END)
+    entry_file.insert(0, filename)
 
-# Call the function
-split_json_by_year(filename,picdl)
+def process_data():
+    filename = entry_file.get()
+    picdl = check_picdl.get()
+    split_json_by_year(filename, picdl)
+
+root = tk.Tk()
+root.title("JSON→MD")
+
+label_file = tk.Label(root, text="选择从Misskey下载的JSON文件:")
+label_file.pack(pady=10)
+
+entry_file = tk.Entry(root, width=50)
+entry_file.pack(pady=5)
+
+btn_browse = tk.Button(root, text="浏览...", command=browse_file)
+btn_browse.pack(pady=5)
+
+# checkbox
+check_picdl = tk.StringVar()
+check_picdl.set("y")
+
+label_picdl = tk.Label(root, text="是否下载图片到本地:")
+label_picdl.pack(pady=5)
+
+radio_yes = tk.Radiobutton(root, text="是", variable=check_picdl, value="y")
+radio_yes.pack()
+
+radio_no = tk.Radiobutton(root, text="否", variable=check_picdl, value="n")
+radio_no.pack()
+
+# process button
+btn_process = tk.Button(root, text="Go!", command=process_data)
+btn_process.pack(pady=10)
+
+root.mainloop()
