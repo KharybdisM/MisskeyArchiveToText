@@ -1,6 +1,7 @@
 # MisskeyArchiveToText
 
 将Misskey的归档文件（json）按年份分割为只包含发表时间、正文、媒体文件的Markdown文件，以提高其可读性。
+
 2024/06/27: 增加了GUI和messagebox提示功能
 
 2024/07/18: 在输出结果中增加了cw部分文字以方便使用者检索，将图片和文本下载功能单独划分
