@@ -3,7 +3,7 @@ import os
 import requests
 from datetime import datetime
 import tkinter as tk
-from tkinter import filedialog,messagebox
+from tkinter import filedialog, messagebox
 
 def download_file(url, directory='misskey-archive/media'):
     local_filename = url.split('/')[-1]
@@ -24,14 +24,20 @@ def split_json_by_year(filename, picdl=None):
         entry_time = datetime.strptime(item['createdAt'], "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%Y-%m-%d %H:%M:%S")
         year = datetime.strptime(item['createdAt'], "%Y-%m-%dT%H:%M:%S.%fZ").year
 
+        cw_content = item.get('cw', '')
+        text_content = item.get('text', '')
+        
         entry = f"发布时间：{entry_time}\n"
-        entry += f"{item['text']}\n"
+        if cw_content:
+            entry += f"{cw_content}\n"
+        entry += f"{text_content}\n"
+        
         if 'files' in item and item['files']:
             files_info = []
             for file in item['files']:
                 if 'url' in file:
                     file_url = file['url']
-                    if picdl is None:
+                    if picdl == 'y':
                         local_filename = download_file(file_url)
                         local_url = os.path.join('media', local_filename)
                         files_info.append(f"![{local_filename}]({local_url})")
@@ -52,7 +58,7 @@ def split_json_by_year(filename, picdl=None):
         with open(os.path.join('misskey-archive', f"{year}.md"), 'w', encoding='utf-8') as f:
             f.write(entries)
     
-    messagebox.showinfo("处理完成", "数据处理完成！生成的Markdown文件保存在misskey-archive这一文件夹下。")
+    messagebox.showinfo("处理完成", "数据处理完成！生成的Markdown文件保存在 misskey-archive 目录下，\n下载的媒体文件保存在该目录的 media 文件夹中。")
 
 def browse_file():
     filename = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
@@ -64,6 +70,8 @@ def process_data():
     picdl = check_picdl.get()
     split_json_by_year(filename, picdl)
 
+
+# GUI
 root = tk.Tk()
 root.title("JSON→MD")
 
@@ -76,20 +84,18 @@ entry_file.pack(pady=5)
 btn_browse = tk.Button(root, text="浏览...", command=browse_file)
 btn_browse.pack(pady=5)
 
-# checkbox
 check_picdl = tk.StringVar()
 check_picdl.set("y")
 
-label_picdl = tk.Label(root, text="是否下载图片到本地:")
+label_picdl = tk.Label(root, text="下载图片到本地:")
 label_picdl.pack(pady=5)
 
-radio_yes = tk.Radiobutton(root, text="是", variable=check_picdl, value="y")
+radio_yes = tk.Radiobutton(root, text="是，仅下载图片", variable=check_picdl, value="y")
 radio_yes.pack()
 
-radio_no = tk.Radiobutton(root, text="否", variable=check_picdl, value="n")
+radio_no = tk.Radiobutton(root, text="否，仅下载文本", variable=check_picdl, value="n")
 radio_no.pack()
 
-# process button
 btn_process = tk.Button(root, text="Go!", command=process_data)
 btn_process.pack(pady=10)
 
